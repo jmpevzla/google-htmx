@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google HTMX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10" 
+        integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" 
+        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-4.0.0-beta.min.js"></script>
+</head>
+<body>
+    <div class="p-4">
+        <button
+            id="g-btn"
+            class="align-middle select-none font-sans font-bold text-center uppercase 
+                transition-all disabled:opacity-50 disabled:shadow-none 
+                disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gradient-to-tr 
+                from-gray-900 to-gray-800 text-white shadow-md shadow-gray-900/10 
+                hover:shadow-lg hover:shadow-gray-900/20 active:opacity-[0.85] 
+                flex items-center gap-3"
+            hx-get="google.php"
+            hx-swap="none"
+        >
+            Get Google with HTMX
+        </button>
+    </div>
+
+    <iframe id="google" class="mt-2 w-full min-h-[calc(100vh-5em)]"></iframe>
+
+    <script>
+        $('#g-btn').on('htmx:afterOnLoad', function(event) {
+            let content = event.detail.xhr.responseText;
+            $('#google').attr('srcdoc', content);
+        });
+
+        $('#google').on('load', function() {
+            const iframe = $('#google').contents();
+
+            const imgsG = iframe.find('img');
+            const regex = /^\//;
+            let matching = imgsG.filter(function() {
+                return regex.test($(this).attr('src'));
+            });
+            matching.each(function (index, elem) {
+                $(elem).attr('src', 'https://www.google.com' + $(elem).attr('src'));
+            });
+
+            const linksG = iframe.find('a');
+            matching = linksG.filter(function() {
+                return regex.test($(this).attr('href'));
+            });
+            matching.each(function (index, elem) {
+                $(elem).attr('href', 'https://www.google.com' + $(elem).attr('href'));
+            });
+
+            linksG.each(function (index, elem) {
+                $(elem).attr('target', '_blank');
+            });
+
+            const form = iframe.find('form');
+            form.attr('action', 'search.php');
+        });
+    </script>
+</body>
+</html>
